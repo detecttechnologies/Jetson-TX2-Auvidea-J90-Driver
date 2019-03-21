@@ -1,0 +1,435 @@
+#include "dt-bindings/clock/tegra186-clock.h"
+#include <dt-bindings/pinctrl/pinctrl-tegra.h>
+#include <dt-bindings/gpio/tegra186-gpio.h>
+
+#define CAM1_RST_L     TEGRA_MAIN_GPIO(R, 1)
+
+/* camera control gpio definitions */
+/ {
+	gpio@2200000 {
+		camera-control-output-high {
+			gpio-hog;
+			output-high;
+			gpios = <CAM1_RST_L 0>;
+			label = "cam1-rst";
+		};
+
+		camera-control-output-low {
+			status = "disabled";
+		};
+
+		camera-control-input {
+			status = "disabled";
+		};
+	};
+};
+
+/ {
+  host1x {
+    vi@15700000 {
+      num-channels = <2>;
+      ports {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        vi_port0: port@0 {
+          status = "okay";
+          reg = <0>;
+          vi_in0: endpoint {
+            status = "okay";
+            csi-port = <2>;
+            bus-width = <2>;
+            remote-endpoint = <&imx219_csi_out0>;
+          };
+        };
+        vi_port1: port@1 {
+          status = "okay";
+          reg = <1>;
+          vi_in1: endpoint {
+            status = "okay";
+            csi-port = <4>;
+            bus-width = <2>;
+            remote-endpoint = <&imx219_csi_out1>;
+          };
+        };
+      };
+    };
+  };
+};
+
+
+/ {
+  host1x {
+    nvcsi@150c0000 {
+      #address-cells = <1>;
+			#size-cells = <0>;
+      num-channels = <2>;
+      //status = "okay"
+      channel@0 {
+        reg = <0>;
+        status = "okay";
+        ports {
+          #address-cells = <1>;
+          #size-cells = <0>;
+          port@0 {
+            status = "okay";
+            reg = <0>;
+            imx219_csi_in0: endpoint@0 {
+              status = "okay";
+              csi-port = <2>;
+              bus-width = <2>;
+              remote-endpoint = <&imx219_phy_out0>;
+            };
+          };
+          port@1 {
+            status = "okay";
+            reg = <1>;
+            imx219_csi_out0: endpoint@1 {
+              status = "okay";
+              remote-endpoint = <&vi_in0>;
+            };
+          };
+        };
+      };
+
+      channel@1 {
+        reg = <1>;
+        status = "okay";
+        ports {
+          #address-cells = <1>;
+          #size-cells = <0>;
+          port@0 {
+            status = "okay";
+            reg = <0>;
+            imx219_csi_in1: endpoint@2 {
+              status = "okay";
+              csi-port = <4>;
+              bus-width = <2>;
+              remote-endpoint = <&imx219_phy_out1>;
+            };
+          };
+          port@1 {
+            status = "okay";
+            reg = <1>;
+            imx219_csi_out1: endpoint@3 {
+              status = "okay";
+              remote-endpoint = <&vi_in1>;
+            };
+          };
+        };
+      };
+    };
+  };
+};
+
+/ {
+       i2c@c240000 {
+
+        imx219_c@10 {
+          // #address-cells = <1>;
+          // #size-cells = <0>;
+          compatible = "nvidia,imx219";
+          reg = <0x10>;
+          devnode = "video0";
+
+          //ADDED
+          clocks = <&tegra_car TEGRA186_CLK_EXTPERIPH3>, <&tegra_car TEGRA186_CLK_PLLP_OUT0>;
+          clock-names = "extperiph3", "pllp_grtba";
+          mclk = "extperiph3";
+          reset-gpios = <&tegra_main_gpio CAM1_RST_L GPIO_ACTIVE_LOW>;
+
+          physical_w = "5.095";
+          physical_h = "4.930";
+
+          sensor_model ="imx219";
+          use_sensor_mode_id = "true";
+
+          mode0 { // IMX219_MODE_1920X1080
+            mclk_khz = "27000";
+            mclk_multiplier = "25";
+            pix_clk_hz = "182400000";
+            // pix_clk_hz = "170000000";
+
+            num_lanes = "2";
+            tegra_sinterface = "serial_c";
+            discontinuous_clk = "no";
+            cil_settletime = "0";
+            pixel_t = "bayer_rggb";
+            readout_orientation = "0";
+            inherent_gain = "1";
+
+            active_w = "1920";
+            active_h = "1080";
+
+            line_length = "3448";
+            dpcm_enable = "false";
+
+            min_gain_val = "1";
+            max_gain_val = "16";
+            min_hdr_ratio = "1";
+            max_hdr_ratio = "64";
+            min_framerate = "1";
+            max_framerate = "30";
+            min_exp_time = "13";
+            max_exp_time = "683709";
+            embedded_metadata_height = "2";
+          };
+          mode1 { // IMX219_MODE_1280X720
+            mclk_khz = "27000";
+            mclk_multiplier = "25";
+            pix_clk_hz = "182400000";
+            // pix_clk_hz = "170000000";
+
+            num_lanes = "2";
+            tegra_sinterface = "serial_c";
+            discontinuous_clk = "no";
+            cil_settletime = "0";
+            pixel_t = "bayer_rggb";
+            readout_orientation = "0";
+            inherent_gain = "1";
+
+            active_w = "1280";
+            active_h = "720";
+
+            line_length = "3448";
+            dpcm_enable = "false";
+            //line_length = "1752";
+
+            min_gain_val = "1";
+            max_gain_val = "16";
+            min_hdr_ratio = "1";
+            max_hdr_ratio = "64";
+            min_framerate = "1";
+            max_framerate = "60";
+            //min_exp_time = "16";
+            min_exp_time = "13";
+            max_exp_time = "683709";
+            embedded_metadata_height = "2";
+          };
+          mode2 { // IMX219_MODE_640X480
+
+            mclk_khz = "27000";
+            mclk_multiplier = "25.0";
+            pix_clk_hz = "182400000";
+            // pix_clk_hz = "170000000";
+
+            num_lanes = "2";
+            tegra_sinterface = "serial_c";
+            discontinuous_clk = "no";
+            cil_settletime = "0";
+            pixel_t = "bayer_rggb";
+            readout_orientation = "0";
+            inherent_gain = "1";
+
+            active_w = "640";
+            active_h = "480";
+
+            line_length = "3559";
+            dpcm_enable = "false";
+
+            min_gain_val = "1.0";
+            max_gain_val = "16";
+            min_hdr_ratio = "1";
+            max_hdr_ratio = "64";
+            min_framerate = "1";
+            max_framerate = "90";
+            //min_exp_time = "22";
+            min_exp_time = "13";
+          max_exp_time = "358733";
+            embedded_metadata_height = "2";
+          };
+
+          ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+              reg = <0>;
+              imx219_phy_out0: endpoint {
+                csi-port = <2>;
+                bus-width = <2>;
+                remote-endpoint = <&imx219_csi_in0>;
+              };
+            };
+          };
+        };
+      };
+
+       i2c@c250000 {
+
+        imx219_e@10 {
+          // #address-cells = <1>;
+          // #size-cells = <0>;
+          compatible = "nvidia,imx219";
+          reg = <0x10>;
+          devnode = "video1";
+
+          //ADDED
+          clocks = <&tegra_car TEGRA186_CLK_EXTPERIPH3>, <&tegra_car TEGRA186_CLK_PLLP_OUT0>;
+          clock-names = "extperiph3", "pllp_grtba";
+          mclk = "extperiph3";
+          reset-gpios = <&tegra_main_gpio CAM1_RST_L GPIO_ACTIVE_LOW>;
+
+          physical_w = "5.095";
+          physical_h = "4.930";
+
+          sensor_model ="imx219";
+          use_sensor_mode_id = "true";
+
+          mode0 { // IMX219_MODE_1920X1080
+            mclk_khz = "27000";
+            mclk_multiplier = "25";
+            pix_clk_hz = "182400000";
+            // pix_clk_hz = "170000000";
+
+            num_lanes = "2";
+            tegra_sinterface = "serial_e";
+            discontinuous_clk = "no";
+            cil_settletime = "0";
+            pixel_t = "bayer_rggb";
+            readout_orientation = "0";
+            inherent_gain = "1";
+
+            active_w = "1920";
+            active_h = "1080";
+
+            line_length = "3448";
+            dpcm_enable = "false";
+
+            min_gain_val = "1";
+            max_gain_val = "16";
+            min_hdr_ratio = "1";
+            max_hdr_ratio = "64";
+            min_framerate = "1";
+            max_framerate = "30";
+            min_exp_time = "13";
+            max_exp_time = "683709";
+            embedded_metadata_height = "2";
+          };
+          mode1 { // IMX219_MODE_1280X720
+            mclk_khz = "27000";
+            mclk_multiplier = "25";
+            pix_clk_hz = "182400000";
+            // pix_clk_hz = "170000000";
+
+            num_lanes = "2";
+            tegra_sinterface = "serial_e";
+            discontinuous_clk = "no";
+            cil_settletime = "0";
+            pixel_t = "bayer_rggb";
+            readout_orientation = "0";
+            inherent_gain = "1";
+
+            active_w = "1280";
+            active_h = "720";
+
+            line_length = "3448";
+            dpcm_enable = "false";
+            //line_length = "1752";
+
+            min_gain_val = "1";
+            max_gain_val = "16";
+            min_hdr_ratio = "1";
+            max_hdr_ratio = "64";
+            min_framerate = "1";
+            max_framerate = "60";
+            //min_exp_time = "16";
+            min_exp_time = "13";
+            max_exp_time = "683709";
+            embedded_metadata_height = "2";
+          };
+          mode2 { // IMX219_MODE_640X480
+
+            mclk_khz = "27000";
+            mclk_multiplier = "25.0";
+            pix_clk_hz = "182400000";
+            // pix_clk_hz = "170000000";
+
+            num_lanes = "2";
+            tegra_sinterface = "serial_e";
+            discontinuous_clk = "no";
+            cil_settletime = "0";
+            pixel_t = "bayer_rggb";
+            readout_orientation = "0";
+            inherent_gain = "1";
+
+            active_w = "640";
+            active_h = "480";
+
+            line_length = "3559";
+            dpcm_enable = "false";
+
+            min_gain_val = "1.0";
+            max_gain_val = "16";
+            min_hdr_ratio = "1";
+            max_hdr_ratio = "64";
+            min_framerate = "1";
+            max_framerate = "90";
+            //min_exp_time = "22";
+            min_exp_time = "13";
+          max_exp_time = "358733";
+            embedded_metadata_height = "2";
+          };
+
+          ports {
+            #address-cells = <1>;
+            #size-cells = <0>;
+
+            port@0 {
+              reg = <0>;
+              imx219_phy_out1: endpoint {
+                csi-port = <4>;
+                bus-width = <2>;
+                remote-endpoint = <&imx219_csi_in1>;
+              };
+            };
+          };
+        };
+      };
+    };
+
+/ {
+  tegra-camera-platform {
+    compatible = "nvidia, tegra-camera-platform";
+    num_csi_lanes = <4>;
+    max_lane_speed = <1500000>;
+    max_pixel_rate = <600000>;
+    min_bits_per_pixel = <10>;
+    vi_peak_byte_per_pixel = <2>;
+    vi_bw_margin_pct = <25>;
+    isp_peak_byte_per_pixel = <5>;
+    isp_bw_margin_pct = <25>;
+
+    modules {
+      module0 {
+        status = "okay";
+        //badge = "imx185_bottom_liimx185";
+        badge = "e3322_rear_A815P2";
+        // badge = "e3322_rear_A819P2";
+        position = "rear";
+        orientation = "0";
+        drivernode0 {
+          status = "okay";
+          pcl_id = "v4l2_sensor";
+          devname = "imx219 1-0010";
+          proc-device-tree = "/proc/device-tree/i2c@c240000/imx219_c@10";
+        };
+      };
+
+      module1 {
+        status = "okay";
+        //badge = "imx185_bottom_liimx185";
+        badge = "e3322_front_A815P2";
+        // badge = "e3322_rear_A819P2";
+        position = "front";
+        orientation = "1";
+        drivernode0 {
+          status = "okay";
+          pcl_id = "v4l2_sensor";
+          devname = "imx219 7-0010";
+          proc-device-tree = "/proc/device-tree/i2c@c250000/imx219_e@10";
+        };
+      };
+
+    };
+  };
+};
