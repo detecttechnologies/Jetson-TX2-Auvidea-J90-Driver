@@ -11,7 +11,7 @@
 2. TX2 module datasheet: Jetson_TX2_Series_Modules_DataSheet_v1.2.pdf
 
 
-#TO DO:
+## TO DO:
 * Update docmentation for L4T V28.2.1, with two camera set-up
 * Prepare detailed documentation with exaplanation of why I've done what I've done.
 * Change drivers to use all 4 lanes 
